@@ -76,7 +76,7 @@ const UserList = ({ lists, onDelete, onEdit }: Props) => {
                 <TableCell>{el.province}</TableCell>
                 <TableCell>{el.country}</TableCell>
                 <TableCell>
-                  {el.picture && el.picture.length > 0 && (
+                  {el.picture && (
                     <img
                       src={el.picture}
                       className="w-[50px] h-[50px] rounded-full object-cover"

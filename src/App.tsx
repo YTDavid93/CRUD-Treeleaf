@@ -7,6 +7,7 @@ const App = () => {
   const [lists, setLists] = useState<List[]>([]);
   const [id, setId] = useState<number | null>(null);
   const [currentData, setCurrentData] = useState<FormData | null>(null);
+  const [file, setFile] = useState<string>("");
 
   // load data from local storage
   useEffect(() => {
@@ -29,7 +30,7 @@ const App = () => {
       district: data.district,
       province: data.province,
       country: data.country,
-      picture: data.picture,
+      picture: file,
     };
 
     let updatedLists;
@@ -46,6 +47,7 @@ const App = () => {
 
     setId(null);
     setCurrentData(null);
+    setFile("")
   };
 
   const handleEdit = (id: number) => {
@@ -53,6 +55,7 @@ const App = () => {
     const dataToEdit = lists.find((list) => list.id === id);
     if (dataToEdit) {
       setCurrentData(dataToEdit);
+      setFile(dataToEdit.picture || "")
     }
   };
 
@@ -62,10 +65,28 @@ const App = () => {
     localStorage.setItem("userListStore", JSON.stringify(updatedLists));
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileURL = URL.createObjectURL(files[0]);
+      setFile(fileURL);
+    }
+  };
+
   return (
     <main>
-      <UserForm onSubmit={onSubmit} editId={id} currentData={currentData} />
-      <UserList lists={lists} onDelete={handleDelete} onEdit={handleEdit} />
+      <UserForm
+        onSubmit={onSubmit}
+        editId={id}
+        currentData={currentData}
+        onInputChange={handleChange}
+        file={file}
+      />
+      <UserList
+        lists={lists}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
     </main>
   );
 };

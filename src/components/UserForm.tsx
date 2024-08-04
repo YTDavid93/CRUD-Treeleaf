@@ -10,6 +10,8 @@ interface Props {
   onSubmit: (data: FormData) => void;
   editId: number | null;
   currentData: FormData | null;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  file: string;
 }
 
 const ACCEPTED_IMAGE_TYPES = ".image/png";
@@ -37,7 +39,7 @@ const schema = z.object({
 
 export type FormData = z.infer<typeof schema>;
 
-const UserForm = ({ onSubmit, editId, currentData }: Props) => {
+const UserForm = ({ onSubmit, editId, currentData, onInputChange, file }: Props) => {
   const {
     register,
     setValue,
@@ -51,7 +53,6 @@ const UserForm = ({ onSubmit, editId, currentData }: Props) => {
   const [countries, setCountries] = useState<CountryName[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [error, setError] = useState("");
-  const [file, setFile] = useState<string>();
 
   useEffect(() => {
     countryName
@@ -87,21 +88,12 @@ const UserForm = ({ onSubmit, editId, currentData }: Props) => {
     }
   }, [currentData, setValue, reset]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const fileURL = URL.createObjectURL(files[0]);
-      setFile(fileURL);
-    }
-  };
-
   return (
     <section className="flex justify-center items-center">
       <form
         onSubmit={handleSubmit((data) => {
           onSubmit(data);
           reset();
-          setFile(undefined);
         })}
         className="p-6 bg-white rounded drop-shadow-lg"
       >
@@ -237,7 +229,7 @@ const UserForm = ({ onSubmit, editId, currentData }: Props) => {
             {...register("picture")}
             type="file"
             id="picture"
-            onChange={handleChange}
+            onChange={onInputChange}
           />
           {file && (
             <img
