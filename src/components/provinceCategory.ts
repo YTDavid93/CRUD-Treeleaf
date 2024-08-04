@@ -7,6 +7,6 @@ const provinceCategory = [
   "Lumbini",
   "Karnali",
   "Sudurpaschim",
-];
+] as const;
 
 export default provinceCategory;
