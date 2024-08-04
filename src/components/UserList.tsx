@@ -46,7 +46,7 @@ const UserList = ({ lists, onDelete, onEdit }: Props) => {
   const userLists = paginate(lists, currentPage, pageSize);
 
   return (
-    <section className="px-8">
+    <section>
       <Table className="bg-white rounded-md">
         <TableCaption className="flex"></TableCaption>
         <TableHeader>
