@@ -10,6 +10,9 @@ import {
   TableRow,
 } from "./ui/table";
 import provinceCategory from "./provinceCategory";
+import PaginationPage from "./ui/PaginationPage";
+import { paginate } from "@/services/paginate";
+import { useState } from "react";
 
 type Province = (typeof provinceCategory)[number];
 
@@ -33,6 +36,15 @@ interface Props {
 }
 
 const UserList = ({ lists, onDelete, onEdit }: Props) => {
+  const pageSize = 5;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const userLists = paginate(lists, currentPage, pageSize);
+
   return (
     <section className="px-8">
       <Table className="bg-white rounded-md">
@@ -52,8 +64,8 @@ const UserList = ({ lists, onDelete, onEdit }: Props) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {lists.length > 0 ? (
-            lists.map((el) => (
+          {userLists.length > 0 ? (
+            userLists.map((el) => (
               <TableRow key={el.id}>
                 <TableCell className="font-medium">{el.name}</TableCell>
                 <TableCell>{el.email}</TableCell>
@@ -92,6 +104,12 @@ const UserList = ({ lists, onDelete, onEdit }: Props) => {
           )}
         </TableBody>
       </Table>
+      <PaginationPage
+        itemsCount={lists.length}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        currentPage={currentPage}
+      />
     </section>
   );
 };
