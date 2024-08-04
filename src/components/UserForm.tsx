@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Props {
   onSubmit: (data: FormData) => void;
+  editId: number | null;
+  currentData: FormData | null;
 }
 
 const ACCEPTED_IMAGE_TYPES = ".image/png";
@@ -18,7 +20,7 @@ const schema = z.object({
   number: z.string().regex(/^\d{7,10}$/, {
     message: "Phone number must be between 7 and 10 digits.",
   }),
-  date: z.string().min(1, { message: "Date is required"}),
+  date: z.string().min(1, { message: "Date is required" }),
   city: z.string().min(1, { message: "City is required." }),
   district: z.string().min(1, { message: "District is required." }),
   province: z.enum(provinceCategory, {
@@ -28,20 +30,20 @@ const schema = z.object({
   picture: z
     .any()
     .refine((files) => files?.length >= 1, { message: "Image is required." })
-    .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      "Only .png formats are supported."
-    ),
+    .refine((files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type), {
+      message: "Only .png formats are supported.",
+    }),
 });
 
 export type FormData = z.infer<typeof schema>;
 
-const UserForm = ({ onSubmit }: Props) => {
+const UserForm = ({ onSubmit, editId, currentData }: Props) => {
   const {
     register,
     setValue,
     formState: { errors },
     handleSubmit,
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -69,23 +71,42 @@ const UserForm = ({ onSubmit }: Props) => {
       });
   }, [setValue]);
 
+  useEffect(() => {
+    if (currentData) {
+      setValue("name", currentData.name);
+      setValue("email", currentData.email);
+      setValue("number", currentData.number);
+      setValue("date", currentData.date);
+      setValue("city", currentData.city);
+      setValue("district", currentData.district);
+      setValue("province", currentData.province);
+      setValue("country", currentData.country);
+      setValue("picture", currentData.picture);
+    } else {
+      reset();
+    }
+  }, [currentData, setValue, reset]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      setFile(URL.createObjectURL(files[0]));
+      const fileURL = URL.createObjectURL(files[0]);
+      setFile(fileURL);
     }
   };
 
   return (
     <section className="flex justify-center items-center">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit((data) => {
+          onSubmit(data);
+          reset();
+          setFile(undefined);
+        })}
         className="p-6 bg-white rounded drop-shadow-lg"
       >
         <div className="mb-3">
-          <label
-            htmlFor="name"
-          >
+          <label htmlFor="name">
             Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -112,9 +133,7 @@ const UserForm = ({ onSubmit }: Props) => {
         </div>
 
         <div className="mb-3">
-          <label
-            htmlFor="number"
-          >
+          <label htmlFor="number">
             Phone Number <span className="text-red-500">*</span>
           </label>
           <input
@@ -129,11 +148,7 @@ const UserForm = ({ onSubmit }: Props) => {
         </div>
 
         <div className="mb-3">
-          <label
-            htmlFor="date"
-          >
-            DOB
-          </label>
+          <label htmlFor="date">DOB</label>
           <input
             {...register("date")}
             type="date"
@@ -237,7 +252,7 @@ const UserForm = ({ onSubmit }: Props) => {
         </div>
 
         <button className="bg-blue-500 rounded-lg text-white text-base w-full px-4 py-2 hover:bg-white hover:text-customBlue hover:border hover:border-customBlue transition-all duration-200 ease-in-out">
-          Save
+          {editId ? "Update" : "Save"}
         </button>
       </form>
     </section>
